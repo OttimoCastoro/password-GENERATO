@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Generatore di bit</title>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+</head>
+<body>
+  <h2>Generatore di bit in Python</h2>
+  <input id="inputBits" type="number" placeholder="Quanti bit vuoi?">
+  <button onclick="runPython()">Genera</button>
+  <pre id="output"></pre>
+
+  <script>
+    async function loadPyodideAndPackages() {
+      window.pyodide = await loadPyodide();
+    }
+    loadPyodideAndPackages();
+
+    async function runPython() {
+      let n = document.getElementById("inputBits").value;
+      let code = `
+import random
+
+n = int(${n})
+bits = "".join(str(random.randint(0, 1)) for _ in range(n))
+if len(bits) % 8 != 0:
+    bits = bits.ljust((len(bits) + 7) // 8 * 8, "0")
+text = "".join(chr(int(bits[i:i+8], 2)) for i in range(0, len(bits), 8))
+
+output = f"Sequenza: {bits}\\n\\nTesto: {text}"
+`;
+      await pyodide.runPythonAsync(code);
+      document.getElementById("output").innerText = pyodide.globals.get("output");
+    }
+  </script>
+</body>
+</html>
